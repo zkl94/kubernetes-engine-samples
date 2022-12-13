@@ -31,7 +31,7 @@ steps:
     apt update
     apt install curl -y
     curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-    cd helm-chart
+    cd whereami/helm-chart
     helm package .
     helm push whereami-1.2.14.tgz oci://us-docker.pkg.dev/google-samples/charts
 
