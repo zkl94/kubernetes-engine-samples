@@ -14,6 +14,7 @@ import whereami_pb2_grpc
 
 METADATA_URL = 'http://metadata.google.internal/computeMetadata/v1/'
 METADATA_HEADERS = {'Metadata-Flavor': 'Google'}
+GRPC_SECURE_PORTS = ['443', '8443'] # when using gRPC, this list is checked when determining to use a secure or insecure channel
 
 # set up logging
 dictConfig({
@@ -88,8 +89,14 @@ class WhereamiPayload(object):
         def call_grpc_backend(backend_service):
 
             try:
-                channel = grpc.insecure_channel(backend_service +
-                                                ':9090')
+                # assumes port number is appended to backend_service name
+                if backend_service.split(':')[1] in GRPC_SECURE_PORTS:
+                    logging.info("Using gRPC secure channel.")
+                    channel = grpc.secure_channel(backend_service, grpc.ssl_channel_credentials())
+                else:
+                    logging.info("Using gRPC insecure channel.")
+                    channel = grpc.insecure_channel(backend_service)
+                
                 stub = whereami_pb2_grpc.WhereamiStub(channel)
                 backend_result = stub.GetPayload(
                     whereami_pb2.Empty())
@@ -113,6 +120,12 @@ class WhereamiPayload(object):
                 self.payload['cluster_name'] = r.json()['instance']['attributes']['cluster-name']
             except:
                 logging.warning("Unable to capture GKE cluster name.")
+            # if we're running on Cloud Run, grab the container instance ID and Google service account
+            try:
+                self.payload['cloud_run_instance_id'] = r.json()['instance']['id']
+                self.payload['cloud_run_service_account'] = r.json()['instance']['serviceAccounts']['default']['email']
+            except:
+                logging.warning("Unable to capture Cloud Run metadata.")
         except:
             logging.warning("Unable to access GCE metadata endpoint.")
 
