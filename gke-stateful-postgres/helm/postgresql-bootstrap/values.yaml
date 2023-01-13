@@ -32,10 +32,18 @@ postgresql-ha:
       effect: NoSchedule
     nodeSelector:
       app.stateful/component: "postgresql"
+      iam.gke.io/gke-metadata-server-enabled: "true"
     pdb:
       create: true
       minAvailable: "" # keep this to mitigate the bug of helm chart: minAvailable and maxUnavailable cannot be both set
       maxUnavailable: 1
+    resources:
+      requests: 
+        cpu: 250m
+        memory: 256Mi
+      limits: 
+        cpu: 250m
+        memory: 256Mi       
   pgpool:
     image:
       repository: bitnami/pgpool
@@ -48,18 +56,36 @@ postgresql-ha:
       effect: NoSchedule
     nodeSelector:
       app.stateful/component: "postgresql-pgpool"
+      iam.gke.io/gke-metadata-server-enabled: "true"
     priorityClassName: "balloon-popper-priority"
     pdb:
       create: true
       minAvailable: 1
       maxUnavailable: 0 # keep this to mitigate the bug of helm chart: minAvailable and maxUnavailable cannot be both set
-
-  metrics: # Enable this for Standard GKE. Can't deploy Managed Prometheus to Autopilot GKE due to missing permission to create resource on namespace Kube-system
+    resources:
+      requests: 
+        cpu: 250m
+        memory: 256Mi
+      limits: 
+        cpu: 250m
+        memory: 256Mi
+  metrics:
     enabled: true
     image:
       repository: bitnami/postgres-exporter
       tag: 0.11.1-debian-11-r27
-
+    resources:
+      requests: 
+        cpu: 250m
+        memory: 256Mi
+      limits: 
+        cpu: 250m
+        memory: 256Mi
+  serviceAccount:
+    create: true
+    name: "postgres-sa"
+    annotations:
+      iam.gke.io/gcp-service-account: ""
 gkeBackup: # Enable this for Standard GKE, ignore during Autopilot test
   enabled: true
   protectedApplications:
@@ -67,11 +93,10 @@ gkeBackup: # Enable this for Standard GKE, ignore during Autopilot test
     components:
       - name: postgresql
         resourceKind: StatefulSet
-        resourceNames: ["postgresql-postgresql-ha-postgresql"]
+        resourceNames: ["postgresql-postgresql-ha-postgresql","postgresql-postgresql-ha-pgpool"]
         strategy:
           type: BackupAllRestoreAll
           backupAllRestoreAll: {}
-
 storageClass:
   create: true
   name: premium-rwo-retain-zonal-pg
