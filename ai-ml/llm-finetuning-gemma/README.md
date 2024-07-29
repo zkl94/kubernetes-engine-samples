@@ -2,5 +2,5 @@
 
 [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine).
 
-Visit [Google Cloud documentation](https://cloud.devsite.corp.google.com/kubernetes-engine/docs/tutorials/finetune-gemma-gpu)
-to follow the tutorials.
+Visit [Google Cloud documentation](https://cloud.google.com/kubernetes-engine/docs/tutorials/finetune-gemma-gpu)
+to follow this tutorial.
