@@ -49,13 +49,9 @@ spec:
         - name: MODEL_ID
           value: "gemma"
         - name: USER_PROMPT
-          value: "<start_of_turn>user
-
-            prompt<end_of_turn>\n"
+          value: "<start_of_turn>user\nprompt<end_of_turn>\n"
         - name: SYSTEM_PROMPT
-          value: "<start_of_turn>model
-
-            prompt<end_of_turn>\n"
+          value: "<start_of_turn>model\nprompt<end_of_turn>\n"
         ports:
         - containerPort: 7860
 ---
